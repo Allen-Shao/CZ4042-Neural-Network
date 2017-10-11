@@ -12,7 +12,7 @@ np.random.seed(10)
 epochs = 1000
 batch_size = 32
 no_hidden1 = 30 #num of neurons in hidden layer 1
-learning_rate = 0.001
+learning_rate = 1e-4
 
 floatX = theano.config.floatX
 
@@ -145,7 +145,7 @@ plt.plot(range(epochs), train_cost, label='train error')
 plt.plot(range(epochs), test_cost, label = 'test error')
 plt.xlabel('Time (s)')
 plt.ylabel('Mean Squared Error')
-plt.title('Training and Test Errors at Alpha = %.3f'%learning_rate)
+plt.title('Training and Test Errors at Alpha = %.4f'%learning_rate)
 plt.legend()
 plt.savefig('p_1b_sample_mse.png')
 plt.show()
