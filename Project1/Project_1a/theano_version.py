@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 import numpy as np
 import theano
@@ -10,12 +10,18 @@ import matplotlib.pyplot as plt
 import time
 
 
-# In[2]:
+# In[ ]:
 
 def init_bias(n = 1):
+    """
+    Initialize the value of bias
+    """
     return(theano.shared(np.zeros(n), theano.config.floatX))
 
 def init_weights(n_in=1, n_out=1, logistic=True):
+    """
+    Initialize the value of weights
+    """
     W_values = np.asarray(
         np.random.uniform(
         low=-np.sqrt(6. / (n_in + n_out)),
@@ -28,18 +34,26 @@ def init_weights(n_in=1, n_out=1, logistic=True):
     return (theano.shared(value=W_values, name='W', borrow=True))
 
 
-# In[3]:
+# In[ ]:
 
 # scale data
 X_min = None
 X_max = None
 def scale(X):
+    """
+    Min-Max Normalization
+    """
     return (X - X_min)/(X_max-np.min(X, axis=0))
+
 # def scale(X, X_min, X_max):
 #     return (X - X_min)/(X_max-np.min(X, axis=0))
 
-# update parameters
+
 def sgd(cost, params, lr=0.01):
+    """
+    update parameters
+    Stochastic Gradient Descent
+    """
     grads = T.grad(cost=cost, wrt=params) # compute the gradient of cost 
     updates = []
     for p, g in zip(params, grads):
@@ -69,9 +83,13 @@ def read_data(filename):
     return X, Y
 
 
-# In[4]:
+# In[ ]:
 
-def train_network(trainX, trainY, testX, testY, decay, learning_rate, epochs, batch_size, num_neurons):    
+def train_network(trainX, trainY, testX, testY, decay, learning_rate, epochs, batch_size, num_neurons):   
+    """
+    Struct the model with 1 hidden layer
+    and train the model
+    """
     # theano expressions
     X = T.matrix() #features
     Y = T.matrix() #output
@@ -120,9 +138,13 @@ def train_network(trainX, trainY, testX, testY, decay, learning_rate, epochs, ba
     return train_cost, test_accuracy, np.mean(batch_time_used), np.sum(batch_time_used)
 
 
-# In[5]:
+# In[ ]:
 
-def train_4layers(trainX, trainY, testX, testY, decay, learning_rate, epochs, batch_size, num_neurons):    
+def train_4layers(trainX, trainY, testX, testY, decay, learning_rate, epochs, batch_size, num_neurons): 
+    """
+    Struct the model with 2 hidden layers
+    and train the model
+    """
     # theano expressions
     X = T.matrix() #features
     Y = T.matrix() #output
@@ -138,7 +160,7 @@ def train_4layers(trainX, trainY, testX, testY, decay, learning_rate, epochs, ba
 
     y_x = T.argmax(py, axis=1)
 
-    cost = T.mean(T.nnet.categorical_crossentropy(py, Y)) + decay*(T.sum(T.sqr(w1)+T.sum(T.sqr(w2)+T.sum(T.sqr(w3)))))
+    cost = T.mean(T.nnet.categorical_crossentropy(py, Y)) + decay*(T.sum(T.sqr(w1)+T.sum(T.sqr(w2)))) + decay*(T.sum(T.sqr(w2)+T.sum(T.sqr(w3))))
     params = [w1, b1, w2, b2, w3, b3]
     updates = sgd(cost, params, learning_rate)
 
@@ -173,9 +195,9 @@ def train_4layers(trainX, trainY, testX, testY, decay, learning_rate, epochs, ba
     return train_cost, test_accuracy, np.mean(batch_time_used), np.sum(batch_time_used)
 
 
-# In[6]:
+# In[ ]:
 
-# Point out the maximum and minimum point
+# Point out the maximum and minimum point on the graph
 
 def annot_max(x,y, ax=None):
     xmax = x[np.argmax(y)]
@@ -220,6 +242,7 @@ def plot1(filename, train_cost, test_accuracy, epochs=1000):
     plt.title('test accuracy')
     annot_max(range(epochs), test_accuracy)
     plt.savefig(filename + '_accuracy.png')
+    
 
 #This is for plot time against parameters
 def plot2(filename, parameters, parameter_name, updatetimes, totaltimes):
@@ -238,6 +261,37 @@ def plot2(filename, parameters, parameter_name, updatetimes, totaltimes):
     plt.ylabel('time in s')
     plt.title('total time for training')
     plt.savefig(filename + '_total_time.png')
+    
+def histogram(x, y, para_name, file_name, ylabel, title):
+    # plot the histogram
+    fig, ax = plt.subplots(figsize=(10,6))
+    rect = ax.bar([0,1,2,3,4],y,align='center') # A bar chart
+   
+    def autolabel(rects):
+        """
+        Attach a text label above each bar displaying its height
+        """
+        for rect in rects:
+            height = rect.get_height()
+            ax.text(rect.get_x() + rect.get_width()/2., 1.05*height,
+                    '%.2f' % height,
+                    ha='center', va='bottom')
+
+    autolabel(rect)
+    plt.xlabel(para_name)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(file_name)
+    
+#This is for plot time against parameters in bar chart(decay)
+def plot_bar(filename, parameters, parameter_name, updatetimes, totaltimes):
+
+    
+    # update time
+    histogram(parameters, updatetimes, parameter_name, filename + '_update_time.png', 'time in ms', 'time for a weight update')
+    
+    # total time
+    histogram(parameters, totaltimes, parameter_name, filename + '_total_time.png', 'time in s', 'total time for training')
 
 
 # In[ ]:
@@ -245,7 +299,7 @@ def plot2(filename, parameters, parameter_name, updatetimes, totaltimes):
 
 
 
-# In[7]:
+# In[ ]:
 
 # Prepare Data
 trainX, trainY = read_data('sat_train.txt')
@@ -262,7 +316,7 @@ print(trainX.shape, trainY.shape)
 print(testX.shape, testY.shape)
 
 
-# In[8]:
+# In[ ]:
 
 # Question 1
 
@@ -276,7 +330,7 @@ train_cost, test_accuracy, update_time, total_time = train_network(trainX, train
 plot1(filename='./graph_theano/1/question1', train_cost=train_cost, test_accuracy=test_accuracy)
 
 
-# In[9]:
+# In[ ]:
 
 # Question 2
 
@@ -302,7 +356,7 @@ for batch_size in batches:
 plot2('./graph_theano/2/batch', batches, 'batch size', updateTimes, totalTimes)
 
 
-# In[10]:
+# In[ ]:
 
 # Question 3
 
@@ -325,7 +379,7 @@ for num_neurons in nums_neurons:
     print("Taken " + str(total_time/1000) + " s total time")
     plot1(filename='./graph_theano/3/neurons_'+str(num_neurons), train_cost=train_cost, test_accuracy=test_accuracy)
 
-plot2('./graph_theano/3/neurons', batches, 'number of neurons', updateTimes, totalTimes)
+plot2('./graph_theano/3/neurons', nums_neurons, 'number of neurons', updateTimes, totalTimes)
 
 
 # In[ ]:
@@ -349,16 +403,16 @@ for decay in decays:
     
     print("Taken average " + str(update_time) + " ms to update weight once")
     print("Taken " + str(total_time/1000) + " s total time")
-    plot1(filename='./graph_theano/4/decay_'+str(decay), train_cost=train_cost, test_accuracy=test_accuracy)
+    plot1(filename='./graph_theano/4/decay_'+str(decay), train_cost=train_cost, test_accuracy=test_accuracy, epochs=epochs)
 
-plot2('./graph_theano/4/decay_', batches, 'decay', updateTimes, totalTimes)
+plot_bar('./graph_theano/4/decay_', decays, 'decay', updateTimes, totalTimes)
 
 
-# In[9]:
+# In[ ]:
 
 # Question 5
 
-decays = 1e-6
+decay = 1e-6
 learning_rate = 0.01
 epochs = 1000
 num_neurons = 10
