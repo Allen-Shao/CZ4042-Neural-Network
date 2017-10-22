@@ -1,2 +1,5 @@
 *.DS_Store
 Project2/data/mnist.pkl
+*.gz
+*.ipynb*
+*__pycache*
