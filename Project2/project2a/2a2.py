@@ -51,7 +51,7 @@ def model(X, w1, b1, w2, b2, w3, b3, w4, b4):
 
 	return y1, o1, y2, o2, pyx
 
-def sgd_momentum(cost, params, lr=0.05, decay=0.0001, momentum=0.5):
+def sgd_momentum(cost, params, lr=0.05, decay=0.0001, momentum=0.1):
 	grads = T.grad(cost=cost, wrt=params)
 	updates = []
 	for p, g in zip(params, grads):
